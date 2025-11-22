@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Space Simulator Game</title>
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <script>
+        // Error tracking to debug loading issues
+        window.onerror = function(message, source, line, column, error) {
+            console.error('ERROR:', message, 'at', source, 'line', line);
+            const errorDiv = document.createElement('div');
+            errorDiv.style.position = 'fixed';
+            errorDiv.style.bottom = '10px';
+            errorDiv.style.left = '10px';
+            errorDiv.style.backgroundColor = 'rgba(255,0,0,0.7)';
+            errorDiv.style.color = 'white';
+            errorDiv.style.padding = '10px';
+            errorDiv.style.zIndex = '9999';
+            errorDiv.textContent = 'Error: ' + message;
+            document.body.appendChild(errorDiv);
+            
+            // Add button to run debug
+            const debugBtn = document.createElement('button');
+            debugBtn.textContent = 'Run Debug';
+            debugBtn.style.marginTop = '10px';
+            debugBtn.style.padding = '5px 10px';
+            debugBtn.addEventListener('click', function() {
+                if (typeof window.debugTHREE === 'function') {
+                    window.debugTHREE();
+                } else {
+                    console.error('Debug function not available');
+                    alert('Debug THREE function not available. THREE object exists: ' + (typeof THREE !== 'undefined'));
+                }
+            });
+            errorDiv.appendChild(document.createElement('br'));
+            errorDiv.appendChild(debugBtn);
+            
+            return false;
+        };
+    </script>
+</head>
+<body>
+    <div id="loading-screen">
+        <div class="loader"></div>
+        <div class="loading-text">Loading Space Simulator...</div>
+        <div class="loading-progress-container">
+            <div id="loading-bar"></div>
+        </div>
+        <div id="loading-debug" style="margin-top: 20px; font-size: 12px; color: #aaa;"></div>
+    </div>
+    
+    <div id="game-container">
+        <div id="hud">
+            <div id="speed-indicator">Speed: <span id="speed-value">0</span></div>
+            <div id="coordinates">X: <span id="x-coord">0</span> Y: <span id="y-coord">0</span> Z: <span id="z-coord">0</span></div>
+            <div id="planet-info"></div>
+        </div>
+    </div>
+    
+    <!-- Load scripts directly instead of dynamically -->
+    <!-- Three.js Core Library -->
+    <script src="libs/three.js"></script>
+    <script src="libs/three-export.js"></script>
+    <script src="libs/debug-three.js"></script>
+    
+    <!-- Three.js Extensions -->
+    <script src="libs/three/examples/jsm/controls/OrbitControls.js"></script>
+    <script src="libs/three/examples/jsm/loaders/DRACOLoader.js"></script>
+    <script src="libs/three/examples/jsm/loaders/GLTFLoader.js"></script>
+    
+    <!-- Game Configuration -->
+    <script src="assets/config.js"></script>
+    
+    <!-- Utility Scripts -->
+    <script src="assets/js/utils/utils.js"></script>
+    
+    <!-- Core Game Modules In Initialization Order -->
+    <script src="assets/js/utils/AssetManager.js"></script>
+    <script src="assets/js/core/SceneManager.js"></script>
+    <script src="assets/js/utils/InputManager.js"></script>
+    <script src="assets/js/utils/AudioManager.js"></script>
+    <script src="assets/js/core/Environment.js"></script>
+    <script src="assets/js/entities/SolarSystem.js"></script>
+    <script src="assets/js/entities/Spacecraft.js"></script>
+    <script src="assets/js/core/Game.js"></script>
+    
+    <!-- Startup Script Last -->
+    <script src="assets/game-startup.js"></script>
+</body>
+</html> 
