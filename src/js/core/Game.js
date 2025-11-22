@@ -37,49 +37,19 @@ class Game {
     }
     
     /**
-     * Initialize game entities and systems
+     * Initialize game systems (uses Engine's entities)
      */
     async init() {
         if (this.initialized) return true;
-        
+
         try {
             console.log('Initializing game logic...');
-            
-            // Get references to core systems from the engine
-            const { sceneManager, assetManager, inputManager, audioManager } = this.engine;
-            
-            // Initialize environment
-            this.environment = new Environment(sceneManager, assetManager);
-            await this.environment.initialize();
-            sceneManager.add(this.environment);
-            
-            // Initialize solar system
-            this.solarSystem = new SolarSystem(sceneManager, assetManager);
-            this.solarSystem.init();
-            sceneManager.add(this.solarSystem);
-            
-            // Initialize spacecraft
-            this.spacecraft = new Spacecraft(sceneManager, inputManager);
-            await this.spacecraft.init();
-            sceneManager.add(this.spacecraft);
-            
-            // Position the spacecraft at the starting position
-            const startingPosition = CONFIG.spacecraft?.startingPosition || { x: 0, y: 0, z: 0 };
-            this.spacecraft.setPosition(
-                startingPosition.x || 0,
-                startingPosition.y || 0,
-                startingPosition.z || 0
-            );
-            
-            // Set the camera to follow the spacecraft
-            sceneManager.setCameraTarget(this.spacecraft.object);
-            
-            // Set up input controls
-            this._setupControls(inputManager);
-            
-            // Add this game object to updateables
-            sceneManager.add(this);
-            
+
+            // Use Engine's entities (don't create duplicates)
+            this.solarSystem = this.engine.solarSystem;
+            this.spacecraft = this.engine.spacecraft;
+            this.environment = this.engine.environment;
+
             this.initialized = true;
             console.log('Game logic initialized');
             return true;
@@ -91,18 +61,11 @@ class Game {
     
     /**
      * Set up input controls for gameplay
+     * Note: Most controls are handled by Engine; this is for game-specific bindings
      */
     _setupControls(inputManager) {
-        // Camera toggle
-        inputManager.onKey('c', (event) => {
-            if (event.type === 'keydown') {
-                this._toggleCamera();
-                playSound('UI_click', { volume: 0.5 });
-            }
-        });
-        
-        // Other game-specific controls can be added here
-        
+        // Game-specific controls can be added here
+        // Camera toggle is handled by Engine
         console.log('Game controls initialized');
     }
     

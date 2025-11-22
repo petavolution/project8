@@ -277,11 +277,17 @@ class Engine {
         this.spacecraft = new Spacecraft();
         if (this.spacecraft.object) {
           this.sceneManager.add(this.spacecraft.object);
-          console.log('Spacecraft created');
+          this.log.info('Engine', 'Spacecraft created');
+
+          // Set camera to target spacecraft
+          if (this.sceneManager.setCameraTarget) {
+            this.sceneManager.setCameraTarget(this.spacecraft.object);
+            this.log.debug('Engine', 'Camera targeting spacecraft');
+          }
         }
       }
     } catch (error) {
-      console.warn('Error creating game world:', error);
+      this.log.warn('Engine', `Error creating game world: ${error.message}`);
     }
   }
   
@@ -301,6 +307,16 @@ class Engine {
 
       document.addEventListener('keydown', (e) => {
         keys[e.key.toLowerCase()] = true;
+
+        // Camera mode toggle (C key)
+        if (e.key.toLowerCase() === 'c' && this.sceneManager) {
+          this.sceneManager.toggleCameraMode();
+          this.log.info('Engine', `Camera mode: ${this.sceneManager.cameraMode}`);
+          showMessage(`Camera: ${this.sceneManager.cameraMode}`, 'info');
+          return;
+        }
+
+        // Spacecraft controls
         if (!this.spacecraft) return;
 
         switch(e.key.toLowerCase()) {
