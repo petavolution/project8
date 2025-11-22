@@ -182,6 +182,9 @@ CONFIG = {
 3. ~~**Standardize Entity Interface** - Ensure all entities implement consistent APIs~~ DONE
 4. ~~**Remove Legacy Code** - Clean up `src/js/legacy/` references~~ DONE
 5. ~~**Fix Program Flow** - Correct script paths and initialization sequence~~ DONE
+6. ~~**Add Test Framework** - CLI-based syntax and structure validation~~ DONE
+7. ~~**Add Debug Logging** - Centralized logging with file output~~ DONE
+8. ~~**Camera System** - Spacecraft targeting and mode toggle (C key)~~ DONE
 
 ### Phase 2: Physics Enhancement
 1. **Accurate Orbital Mechanics** - Implement Keplerian orbits for planets
@@ -251,11 +254,42 @@ CONFIG = {
 
 ---
 
+## Testing & Debugging
+
+### CLI Test Framework
+Run syntax and structure tests:
+```bash
+node tests/test-runner.js
+```
+
+### Debug Logging
+- Logs written to `debug-log.txt`
+- Browser console: colored output
+- Access logger: `window.logger` or `window.debugLogger`
+- Save logs: `logger.saveToFile()`
+
+### Controls Reference
+| Key | Action |
+|-----|--------|
+| W / ↑ | Accelerate |
+| S / ↓ | Decelerate |
+| A / ← | Turn Left |
+| D / → | Turn Right |
+| Q | Roll Left |
+| E | Roll Right |
+| R | Pitch Up |
+| F | Pitch Down |
+| C | Toggle Camera Mode |
+| P / Esc | Pause |
+
+---
+
 ## File Reference Quick Guide
 
 ### Entry Points
 - `index.html` - Load game in browser
 - `server.js` - Start local server: `node server.js`
+- `tests/test-runner.js` - Run CLI tests
 
 ### Configuration
 - `src/config.js` - All game settings
