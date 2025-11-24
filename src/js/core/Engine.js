@@ -6,21 +6,32 @@
 
 class Engine {
   constructor() {
+    // Debug logger reference
+    this.log = window.debugLogger || {
+      debug: () => {},
+      info: () => {},
+      warn: () => {},
+      error: () => {}
+    };
+
+    this.log.info('Engine', 'Constructing Engine instance');
+
     // Core components
     this.sceneManager = null;
     this.assetManager = null;
     this.inputManager = null;
     this.audioManager = null;
-    
+
     // Game entities
     this.solarSystem = null;
     this.spacecraft = null;
-    
+    this.environment = null;
+
     // Engine state
     this.isInitialized = false;
     this.isRunning = false;
     this.isPaused = false;
-    
+
     // Performance monitoring
     this.lastTime = 0;
     this.frameTime = 0;
@@ -28,51 +39,58 @@ class Engine {
     this.fpsUpdateInterval = 500; // ms
     this.lastFpsUpdate = 0;
     this.fps = 0;
-    
+
     // Bind methods to maintain scope
     this.update = this.update.bind(this);
     this.render = this.render.bind(this);
     this.gameLoop = this.gameLoop.bind(this);
-    
+
     // Event listeners
     this.eventListeners = {};
+
+    this.log.debug('Engine', 'Constructor complete');
   }
   
   /**
    * Initializes the game engine and all related components
    */
   async init() {
-    console.log('Initializing Engine...');
+    this.log.info('Engine', 'Starting initialization');
     updateLoadingProgress(10, 'Starting engine initialization...');
-    
+
     try {
       // Initialize Three.js first
+      this.log.debug('Engine', 'Initializing Three.js');
       await this._initThreeJs();
       updateLoadingProgress(20, 'Three.js initialized');
-      
+
       // Create core managers
+      this.log.debug('Engine', 'Creating core managers');
       await this._initCoreManagers();
       updateLoadingProgress(40, 'Core managers initialized');
-      
+
       // Load assets
+      this.log.debug('Engine', 'Loading assets');
       await this._loadAssets();
       updateLoadingProgress(60, 'Assets loaded');
-      
+
       // Create game world
+      this.log.debug('Engine', 'Creating game world');
       await this._createGameWorld();
       updateLoadingProgress(80, 'Game world created');
-      
+
       // Set up input handling
+      this.log.debug('Engine', 'Setting up input handlers');
       this._setupInputHandlers();
       updateLoadingProgress(90, 'Input handlers set up');
-      
+
       // Setup is complete
       this.isInitialized = true;
-      console.log('Engine initialization complete');
-      
+      this.log.info('Engine', 'Initialization complete');
+
       return true;
     } catch (error) {
-      console.error('Failed to initialize engine:', error);
+      this.log.error('Engine', `Initialization failed: ${error.message}`, { stack: error.stack });
       updateDebugText(`Engine error: ${error.message}`);
       return false;
     }
@@ -234,30 +252,42 @@ class Engine {
    */
   async _createGameWorld() {
     try {
-      // Create solar system if available
+      // Create environment (skybox, stars, asteroids)
+      if (typeof Environment !== 'undefined') {
+        this.environment = new Environment(this.sceneManager);
+        await this.environment.initialize();
+        console.log('Environment created');
+      }
+
+      // Create solar system
       if (typeof SolarSystem !== 'undefined') {
         this.solarSystem = new SolarSystem();
         this.sceneManager.add(this.solarSystem.object);
+        console.log('SolarSystem created');
       } else {
-        console.warn('SolarSystem class not defined');
-        
-        // Create a fallback solar system - just a simple sphere
+        // Fallback sun
         const geometry = new THREE.SphereGeometry(5, 32, 32);
         const material = new THREE.MeshBasicMaterial({ color: 0xffff00 });
         const sun = new THREE.Mesh(geometry, material);
         this.sceneManager.add(sun);
       }
-      
-      // Create spacecraft if available
+
+      // Create spacecraft
       if (typeof Spacecraft !== 'undefined') {
         this.spacecraft = new Spacecraft();
-        this.sceneManager.add(this.spacecraft.object);
-      } else {
-        console.warn('Spacecraft class not defined');
+        if (this.spacecraft.object) {
+          this.sceneManager.add(this.spacecraft.object);
+          this.log.info('Engine', 'Spacecraft created');
+
+          // Set camera to target spacecraft
+          if (this.sceneManager.setCameraTarget) {
+            this.sceneManager.setCameraTarget(this.spacecraft.object);
+            this.log.debug('Engine', 'Camera targeting spacecraft');
+          }
+        }
       }
     } catch (error) {
-      console.warn('Error creating game world:', error);
-      // Continue anyway - the scene might be empty but we can still run
+      this.log.warn('Engine', `Error creating game world: ${error.message}`);
     }
   }
   
@@ -266,18 +296,62 @@ class Engine {
    */
   _setupInputHandlers() {
     try {
-      // Only set up if input manager exists
-      if (this.inputManager) {
-        // Setup pause/resume handler
-        this.inputManager.addKeyBinding('p', () => {
-          this.togglePause();
-        });
-        
-        // Add ESC as alternate pause key
-        this.inputManager.addKeyBinding('Escape', () => {
-          this.togglePause();
-        });
-      }
+      if (!this.inputManager) return;
+
+      // Pause controls
+      this.inputManager.addKeyBinding('p', () => this.togglePause());
+      this.inputManager.addKeyBinding('Escape', () => this.togglePause());
+
+      // Spacecraft controls - using key state tracking
+      const keys = {};
+
+      document.addEventListener('keydown', (e) => {
+        keys[e.key.toLowerCase()] = true;
+
+        // Camera mode toggle (C key)
+        if (e.key.toLowerCase() === 'c' && this.sceneManager) {
+          this.sceneManager.toggleCameraMode();
+          this.log.info('Engine', `Camera mode: ${this.sceneManager.cameraMode}`);
+          showMessage(`Camera: ${this.sceneManager.cameraMode}`, 'info');
+          return;
+        }
+
+        // Spacecraft controls
+        if (!this.spacecraft) return;
+
+        switch(e.key.toLowerCase()) {
+          case 'w': case 'arrowup': this.spacecraft.accelerate(true); break;
+          case 's': case 'arrowdown': this.spacecraft.decelerate(true); break;
+          case 'a': this.spacecraft.turnLeft(true); break;
+          case 'd': this.spacecraft.turnRight(true); break;
+          case 'arrowleft': this.spacecraft.turnLeft(true); break;
+          case 'arrowright': this.spacecraft.turnRight(true); break;
+          case 'q': this.spacecraft.rollLeft(true); break;
+          case 'e': this.spacecraft.rollRight(true); break;
+          case 'r': this.spacecraft.pitchUp(true); break;
+          case 'f': this.spacecraft.pitchDown(true); break;
+        }
+      });
+
+      document.addEventListener('keyup', (e) => {
+        keys[e.key.toLowerCase()] = false;
+        if (!this.spacecraft) return;
+
+        switch(e.key.toLowerCase()) {
+          case 'w': case 'arrowup': this.spacecraft.accelerate(false); break;
+          case 's': case 'arrowdown': this.spacecraft.decelerate(false); break;
+          case 'a': this.spacecraft.turnLeft(false); break;
+          case 'd': this.spacecraft.turnRight(false); break;
+          case 'arrowleft': this.spacecraft.turnLeft(false); break;
+          case 'arrowright': this.spacecraft.turnRight(false); break;
+          case 'q': this.spacecraft.rollLeft(false); break;
+          case 'e': this.spacecraft.rollRight(false); break;
+          case 'r': this.spacecraft.pitchUp(false); break;
+          case 'f': this.spacecraft.pitchDown(false); break;
+        }
+      });
+
+      console.log('Input handlers configured');
     } catch (error) {
       console.warn('Error setting up input handlers:', error);
     }
@@ -337,7 +411,22 @@ class Engine {
    * Update all game objects
    */
   update(deltaTime) {
-    // Update scene manager
+    // Update spacecraft
+    if (this.spacecraft) {
+      this.spacecraft.update(deltaTime);
+    }
+
+    // Update solar system
+    if (this.solarSystem) {
+      this.solarSystem.update(deltaTime);
+    }
+
+    // Update environment
+    if (this.environment) {
+      this.environment.update(deltaTime);
+    }
+
+    // Update scene manager (camera follow, etc.)
     if (this.sceneManager) {
       this.sceneManager.update(deltaTime);
     }

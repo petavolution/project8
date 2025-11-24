@@ -61,31 +61,42 @@
     <!-- Load scripts directly instead of dynamically -->
     <!-- Three.js Core Library -->
     <script src="libs/three.js"></script>
-    <script src="libs/three-export.js"></script>
-    <script src="libs/debug-three.js"></script>
-    
-    <!-- Three.js Extensions -->
+
+    <!-- Three.js Extensions (modified for global THREE) -->
     <script src="libs/three/examples/jsm/controls/OrbitControls.js"></script>
     <script src="libs/three/examples/jsm/loaders/DRACOLoader.js"></script>
     <script src="libs/three/examples/jsm/loaders/GLTFLoader.js"></script>
+
+    <!-- THREE.js Extension Loader (ensures extensions are on THREE namespace) -->
+    <script src="libs/three-loader.js"></script>
+    <script src="libs/debug-three.js"></script>
     
     <!-- Game Configuration -->
-    <script src="assets/config.js"></script>
-    
-    <!-- Utility Scripts -->
-    <script src="assets/js/utils/utils.js"></script>
-    
+    <script src="src/config.js"></script>
+
+    <!-- Utility Scripts (load first) -->
+    <script src="src/js/utils/DebugLogger.js"></script>
+    <script src="src/js/utils/utils.js"></script>
+    <script src="src/js/utils/MathUtils.js"></script>
+    <script src="src/js/utils/PhysicsUtils.js"></script>
+    <script src="src/js/utils/Gravity.js"></script>
+    <script src="src/js/utils/KeplerianOrbit.js"></script>
+
     <!-- Core Game Modules In Initialization Order -->
-    <script src="assets/js/utils/AssetManager.js"></script>
-    <script src="assets/js/core/SceneManager.js"></script>
-    <script src="assets/js/utils/InputManager.js"></script>
-    <script src="assets/js/utils/AudioManager.js"></script>
-    <script src="assets/js/core/Environment.js"></script>
-    <script src="assets/js/entities/SolarSystem.js"></script>
-    <script src="assets/js/entities/Spacecraft.js"></script>
-    <script src="assets/js/core/Game.js"></script>
-    
+    <script src="src/js/entities/Entity.js"></script>
+    <script src="src/js/core/AssetManager.js"></script>
+    <script src="src/js/core/SceneManager.js"></script>
+    <script src="src/js/core/InputManager.js"></script>
+    <script src="src/js/core/AudioManager.js"></script>
+    <script src="src/js/entities/Star.js"></script>
+    <script src="src/js/entities/Planet.js"></script>
+    <script src="src/js/entities/SolarSystem.js"></script>
+    <script src="src/js/entities/Spacecraft.js"></script>
+    <script src="src/js/core/Environment.js"></script>
+    <script src="src/js/core/Engine.js"></script>
+    <script src="src/js/core/Game.js"></script>
+
     <!-- Startup Script Last -->
-    <script src="assets/game-startup.js"></script>
+    <script src="src/startup.js"></script>
 </body>
 </html> 

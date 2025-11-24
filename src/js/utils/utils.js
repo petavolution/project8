@@ -1,6 +1,72 @@
 // Utility functions for Planetary World Simulation
 
 /**
+ * Shows a message to the user (HUD notification)
+ * @param {string} text - Message text
+ * @param {string} type - Message type: 'info', 'warning', 'error', 'success'
+ */
+function showMessage(text, type = 'info') {
+    console.log(`[${type.toUpperCase()}] ${text}`);
+
+    // Create or get message container
+    let msgContainer = document.getElementById('message-container');
+    if (!msgContainer) {
+        msgContainer = document.createElement('div');
+        msgContainer.id = 'message-container';
+        msgContainer.style.cssText = 'position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:1000;';
+        document.body.appendChild(msgContainer);
+    }
+
+    // Create message element
+    const msg = document.createElement('div');
+    msg.style.cssText = 'padding:10px 20px;margin:5px;border-radius:5px;font-family:sans-serif;';
+
+    // Style based on type
+    const colors = {
+        info: 'background:#333;color:#fff;',
+        warning: 'background:#f90;color:#000;',
+        error: 'background:#f33;color:#fff;',
+        success: 'background:#3c3;color:#fff;'
+    };
+    msg.style.cssText += colors[type] || colors.info;
+    msg.textContent = text;
+
+    msgContainer.appendChild(msg);
+
+    // Auto-remove after 3 seconds
+    setTimeout(() => {
+        msg.style.opacity = '0';
+        msg.style.transition = 'opacity 0.5s';
+        setTimeout(() => msg.remove(), 500);
+    }, 3000);
+}
+
+/**
+ * Updates debug text display
+ * @param {string} message - Debug message
+ */
+function updateDebugText(message) {
+    let debugEl = document.getElementById('loading-debug');
+    if (debugEl) {
+        debugEl.textContent = message;
+    }
+}
+
+/**
+ * Plays a sound effect (stub - requires actual audio files)
+ * @param {string} soundId - Sound identifier
+ * @param {Object} options - Playback options
+ */
+function playSound(soundId, options = {}) {
+    // Stub - will use AudioManager when available
+    if (window.engine && window.engine.audioManager) {
+        return window.engine.audioManager.playSound(soundId, options);
+    }
+    // Silent fallback
+    return null;
+}
+
+/**
  * Updates loading progress bar and text
  * @param {number} percent - Loading progress percentage (0-100)
  * @param {string} message - Loading status message

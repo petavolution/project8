@@ -167,6 +167,14 @@ class SolarSystem {
     getStars() {
         return this.stars;
     }
+
+    /**
+     * Get the sun (primary star)
+     * @returns {Star} The sun or null
+     */
+    get sun() {
+        return this.stars.length > 0 ? this.stars[0] : null;
+    }
     
     /**
      * Get celestial body by name
